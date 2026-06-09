@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>성경 필사 — 말씀을 손끝으로</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600&family=Noto+Sans+KR:wght@400;500&family=EB+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #1a1714;
+  --ink-2: #4a4540;
+  --ink-3: #8a837a;
+  --parchment: #f7f3ed;
+  --parchment-2: #ede8e0;
+  --parchment-3: #e0d9ce;
+  --gold: #c09a52;
+  --gold-light: #e8d49a;
+  --correct: #4a7c59;
+  --wrong: #a33a2e;
+  --wrong-bg: #fce8e6;
+  --done-opacity: 0.38;
+  --upcoming-opacity: 0.28;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--parchment);
+  color: var(--ink);
+  font-family: 'Noto Sans KR', sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── TOP BAR ── */
+.topbar {
+  border-bottom: 1px solid var(--parchment-3);
+  padding: 0 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  height: 56px;
+  background: var(--parchment);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.logo {
+  font-family: 'EB Garamond', 'Noto Serif KR', serif;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+  margin-right: 8px;
+  white-space: nowrap;
+}
+.logo em { font-style: italic; color: var(--gold); }
+
+.lang-tabs { display: flex; gap: 4px; margin-left: auto; }
+.lang-tab {
+  font-size: 12px;
+  padding: 4px 12px;
+  border-radius: 99px;
+  border: 1px solid var(--parchment-3);
+  background: transparent;
+  color: var(--ink-3);
+  cursor: pointer;
+  font-family: 'Noto Sans KR', sans-serif;
+  transition: all 0.15s;
+}
+.lang-tab.active { background: var(--ink); color: var(--parchment); border-color: var(--ink); }
+.lang-tab:hover:not(.active) { background: var(--parchment-2); }
+
+/* ── SELECTS ── */
+.select-row {
+  padding: 1rem 2rem 0;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.sel-label { font-size: 11px; color: var(--ink-3); letter-spacing: 0.08em; text-transform: uppercase; }
+
+select {
+  font-size: 13px;
+  padding: 6px 28px 6px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--parchment-3);
+  background: var(--parchment-2);
+  color: var(--ink);
+  cursor: pointer;
+  font-family: 'Noto Sans KR', sans-serif;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%238a837a' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  transition: border-color 0.15s;
+}
+select:focus { outline: none; border-color: var(--gold); }
+
+/* ── MAIN LAYOUT ── */
+.main {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 0;
+  flex: 1;
+  max-width: 1100px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 1.5rem 2rem 3rem;
+}
+
+/* ── VERSES PANEL ── */
+.verses-col { padding-right: 2.5rem; }
+
+.chapter-label {
+  font-family: 'EB Garamond', 'Noto Serif KR', serif;
+  font-size: 13px;
+  color: var(--gold);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.chapter-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--parchment-3);
+}
+
+.verses-list { display: flex; flex-direction: column; gap: 0; }
+
+.verse-row {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid var(--parchment-2);
+  transition: opacity 0.35s ease;
+}
+.verse-row:last-child { border-bottom: none; }
+.verse-row.done { opacity: var(--done-opacity); }
+.verse-row.active { opacity: 1; }
+.verse-row.upcoming { opacity: var(--upcoming-opacity); }
+
+.verse-num {
+  font-family: 'EB Garamond', serif;
+  font-size: 13px;
+  color: var(--gold);
+  min-width: 24px;
+  padding-top: 4px;
+  font-style: italic;
+}
+
+.verse-text {
+  font-family: 'Noto Serif KR', 'EB Garamond', serif;
+  font-size: 16px;
+  line-height: 1.95;
+  color: var(--ink);
+  flex: 1;
+  letter-spacing: 0.01em;
+}
+
+.char-correct { color: var(--correct); }
+.char-wrong { color: var(--wrong); background: var(--wrong-bg); border-radius: 2px; }
+.cursor {
+  display: inline-block;
+  width: 1.5px;
+  height: 1em;
+  background: var(--gold);
+  vertical-align: text-bottom;
+  animation: blink 1s step-end infinite;
+  margin: 0 0.5px;
+  border-radius: 1px;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+/* ── RIGHT SIDEBAR ── */
+.sidebar {
+  border-left: 1px solid var(--parchment-3);
+  padding-left: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  position: sticky;
+  top: 72px;
+  align-self: start;
+}
+
+/* stats grid */
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+.stat-card {
+  background: var(--parchment-2);
+  border: 1px solid var(--parchment-3);
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+}
+.stat-label {
+  font-size: 10px;
+  color: var(--ink-3);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.stat-value {
+  font-family: 'EB Garamond', serif;
+  font-size: 30px;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1;
+}
+.stat-unit { font-size: 13px; font-weight: 400; color: var(--ink-3); margin-left: 2px; }
+
+/* progress */
+.prog-section {}
+.prog-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.prog-title { font-size: 11px; color: var(--ink-3); letter-spacing: 0.08em; text-transform: uppercase; }
+.prog-pct { font-family: 'EB Garamond', serif; font-size: 20px; color: var(--ink); }
+.prog-bar { height: 5px; background: var(--parchment-3); border-radius: 99px; overflow: hidden; }
+.prog-fill { height: 100%; background: var(--gold); border-radius: 99px; transition: width 0.2s ease; }
+
+/* input area */
+.input-section {}
+.input-hint {
+  font-size: 11px;
+  color: var(--ink-3);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.kbd { background: var(--parchment-3); border-radius: 4px; padding: 1px 6px; font-size: 10px; letter-spacing: 0.05em; font-family: monospace; color: var(--ink-2); }
+
+textarea {
+  width: 100%;
+  min-height: 110px;
+  font-size: 14px;
+  line-height: 1.8;
+  padding: 0.85rem 1rem;
+  border-radius: 10px;
+  border: 1.5px solid var(--parchment-3);
+  background: white;
+  color: var(--ink);
+  resize: none;
+  font-family: 'Noto Sans KR', sans-serif;
+  transition: border-color 0.15s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+textarea:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(192,154,82,0.12); }
+textarea:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.btn-row { display: flex; gap: 8px; }
+
+.btn {
+  flex: 1;
+  font-size: 13px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--parchment-3);
+  background: var(--parchment-2);
+  color: var(--ink-2);
+  cursor: pointer;
+  font-family: 'Noto Sans KR', sans-serif;
+  transition: all 0.15s;
+  text-align: center;
+}
+.btn:hover { background: var(--parchment-3); color: var(--ink); }
+.btn-primary {
+  background: var(--ink);
+  color: var(--parchment);
+  border-color: var(--ink);
+}
+.btn-primary:hover { background: var(--ink-2); }
+
+.done-banner {
+  display: none;
+  background: var(--correct);
+  color: white;
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: center;
+  line-height: 1.5;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  .main { grid-template-columns: 1fr; padding: 1rem 1rem 2rem; }
+  .verses-col { padding-right: 0; margin-bottom: 1.5rem; }
+  .sidebar { position: static; border-left: none; padding-left: 0; border-top: 1px solid var(--parchment-3); padding-top: 1.5rem; }
+  .topbar { padding: 0 1rem; }
+  .select-row { padding: 1rem 1rem 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="logo"><em>말씀</em> 필사</div>
+  <select id="book-sel" onchange="onBookChange()" style="max-width:120px"></select>
+  <select id="chap-sel" onchange="loadChapter()" style="max-width:90px"></select>
+  <div class="lang-tabs">
+    <button class="lang-tab active" onclick="setLang('ko',this)">한국어</button>
+    <button class="lang-tab" onclick="setLang('en',this)">English</button>
+  </div>
+</header>
+
+<div class="select-row" id="sel-row" style="display:none"></div>
+
+<div class="main">
+  <!-- LEFT: verses -->
+  <div class="verses-col">
+    <div class="chapter-label" id="chap-label">창세기 1장</div>
+    <div class="verses-list" id="verses-list"></div>
+  </div>
+
+  <!-- RIGHT: sidebar -->
+  <div class="sidebar">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">타자 속도</div>
+        <div class="stat-value"><span id="s-speed">0</span><span class="stat-unit">타</span></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">정확도</div>
+        <div class="stat-value"><span id="s-acc">—</span><span class="stat-unit" id="s-acc-u"></span></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">완료 구절</div>
+        <div class="stat-value"><span id="s-done">0</span><span class="stat-unit" id="s-done-u">절</span></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">경과 시간</div>
+        <div class="stat-value"><span id="s-time">0</span><span class="stat-unit">초</span></div>
+      </div>
+    </div>
+
+    <div class="prog-section">
+      <div class="prog-header">
+        <span class="prog-title">장 진행률</span>
+        <span class="prog-pct" id="prog-pct">0%</span>
+      </div>
+      <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+    </div>
+
+    <div class="input-section">
+      <div class="input-hint">
+        구절을 그대로 입력하세요 — 완료 후 <span class="kbd">Enter</span> 로 다음 구절
+      </div>
+      <textarea id="input" placeholder="여기에 입력..." onkeydown="onKeyDown(event)" oninput="onInput()"></textarea>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn" onclick="resetChapter()">처음부터</button>
+      <button class="btn btn-primary" onclick="nextChapter()">다음 장 →</button>
+    </div>
+
+    <div class="done-banner" id="done-banner">
+      ✦ 이 장을 완료했습니다<br>수고하셨습니다
+    </div>
+  </div>
+</div>
+
+<script>
+const BIBLE = {
+  ko: {
+    "창세기": {
+      1: {
+        1:"태초에 하나님이 천지를 창조하시니라",
+        2:"땅이 혼돈하고 공허하며 흑암이 깊음 위에 있고 하나님의 영은 수면 위에 운행하시니라",
+        3:"하나님이 이르시되 빛이 있으라 하시니 빛이 있었고",
+        4:"빛이 하나님이 보시기에 좋았더라 하나님이 빛과 어둠을 나누사",
+        5:"하나님이 빛을 낮이라 부르시고 어둠을 밤이라 부르시니라 저녁이 되고 아침이 되니 이는 첫째 날이니라"
+      },
+      2: {
+        1:"천지와 만물이 다 이루어지니라",
+        2:"하나님이 그가 하시던 일을 일곱째 날에 마치시니 그가 하시던 모든 일을 그치고 일곱째 날에 안식하시니라",
+        3:"하나님이 그 일곱째 날을 복되게 하사 거룩하게 하셨으니 이는 하나님이 그 창조하시며 만드시던 모든 일을 마치시고 그 날에 안식하셨음이니라"
+      }
+    },
+    "시편": {
+      23: {
+        1:"여호와는 나의 목자시니 내게 부족함이 없으리로다",
+        2:"그가 나를 푸른 풀밭에 누이시며 쉴 만한 물가로 인도하시는도다",
+        3:"내 영혼을 소생시키시고 자기 이름을 위하여 의의 길로 인도하시는도다",
+        4:"내가 사망의 음침한 골짜기로 다닐지라도 해를 두려워하지 않을 것은 주께서 나와 함께 하심이라 주의 지팡이와 막대기가 나를 안위하시나이다",
+        5:"주께서 내 원수의 목전에서 내게 상을 차려 주시고 기름을 내 머리에 부으셨으니 내 잔이 넘치나이다",
+        6:"내 평생에 선하심과 인자하심이 반드시 나를 따르리니 내가 여호와의 집에 영원히 살리로다"
+      }
+    },
+    "요한복음": {
+      3: {
+        16:"하나님이 세상을 이처럼 사랑하사 독생자를 주셨으니 이는 그를 믿는 자마다 멸망하지 않고 영생을 얻게 하려 하심이라",
+        17:"하나님이 그 아들을 세상에 보내신 것은 세상을 심판하려 하심이 아니요 그로 말미암아 세상이 구원을 받게 하려 하심이라",
+        18:"그를 믿는 자는 심판을 받지 아니하는 것이요 믿지 아니하는 자는 하나님의 독생자의 이름을 믿지 아니하므로 벌써 심판을 받은 것이니라"
+      },
+      1: {
+        1:"태초에 말씀이 계시니라 이 말씀이 하나님과 함께 계셨으니 이 말씀은 곧 하나님이시니라",
+        2:"그가 태초에 하나님과 함께 계셨고",
+        3:"만물이 그로 말미암아 지은 바 되었으니 지은 것이 하나도 그가 없이는 된 것이 없느니라",
+        4:"그 안에 생명이 있었으니 이 생명은 사람들의 빛이라"
+      }
+    },
+    "빌립보서": {
+      4: {
+        6:"아무것도 염려하지 말고 다만 모든 일에 기도와 간구로 너희 구할 것을 감사함으로 하나님께 아뢰라",
+        7:"그리하면 모든 지각에 뛰어난 하나님의 평강이 그리스도 예수 안에서 너희 마음과 생각을 지키시리라",
+        13:"내게 능력 주시는 자 안에서 내가 모든 것을 할 수 있느니라"
+      }
+    }
+  },
+  en: {
+    "Genesis": {
+      1: {
+        1:"In the beginning God created the heavens and the earth.",
+        2:"Now the earth was formless and empty, darkness was over the surface of the deep, and the Spirit of God was hovering over the waters.",
+        3:"And God said, Let there be light, and there was light.",
+        4:"God saw that the light was good, and he separated the light from the darkness.",
+        5:"God called the light day, and the darkness he called night. And there was evening, and there was morning, the first day."
+      },
+      2: {
+        1:"Thus the heavens and the earth were completed in all their vast array.",
+        2:"By the seventh day God had finished the work he had been doing; so on the seventh day he rested from all his work.",
+        3:"Then God blessed the seventh day and made it holy, because on it he rested from all the work of creating that he had done."
+      }
+    },
+    "Psalms": {
+      23: {
+        1:"The Lord is my shepherd, I lack nothing.",
+        2:"He makes me lie down in green pastures, he leads me beside quiet waters,",
+        3:"he refreshes my soul. He guides me along the right paths for his name's sake.",
+        4:"Even though I walk through the darkest valley, I will fear no evil, for you are with me; your rod and your staff, they comfort me.",
+        5:"You prepare a table before me in the presence of my enemies. You anoint my head with oil; my cup overflows.",
+        6:"Surely your goodness and love will follow me all the days of my life, and I will dwell in the house of the Lord forever."
+      }
+    },
+    "John": {
+      3: {
+        16:"For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life.",
+        17:"For God did not send his Son into the world to condemn the world, but to save the world through him.",
+        18:"Whoever believes in him is not condemned, but whoever does not believe stands condemned already because they have not believed in the name of God's one and only Son."
+      },
+      1: {
+        1:"In the beginning was the Word, and the Word was with God, and the Word was God.",
+        2:"He was with God in the beginning.",
+        3:"Through him all things were made; without him nothing was made that has been made.",
+        4:"In him was life, and that life was the light of all mankind."
+      }
+    },
+    "Philippians": {
+      4: {
+        6:"Do not be anxious about anything, but in every situation, by prayer and petition, with thanksgiving, present your requests to God.",
+        7:"And the peace of God, which transcends all understanding, will guard your hearts and your minds in Christ Jesus.",
+        13:"I can do all this through him who gives me strength."
+      }
+    }
+  }
+};
+
+let lang = 'ko';
+let verses = [];
+let verseKeys = [];
+let currentIdx = 0;
+let startTime = null;
+let timerInterval = null;
+let totalTypedChars = 0;   // 완료된 구절들의 총 글자 수
+let totalCorrectChars = 0; // 완료된 구절들의 정확한 글자 수
+let doneCount = 0;
+let chapterDone = false;
+let verseCompleted = false; // 현재 구절 완료 여부 (Enter 대기 중)
+
+function setLang(l, btn) {
+  lang = l;
+  document.querySelectorAll('.lang-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  updateUIText();
+  populateBooks();
+}
+
+function updateUIText() {
+  const isKo = lang === 'ko';
+  document.getElementById('s-done-u').textContent = isKo ? '절' : '';
+  document.getElementById('input').placeholder = isKo ? '여기에 입력...' : 'Type here...';
+  document.querySelector('.input-hint').innerHTML = isKo
+    ? '구절을 그대로 입력하세요 — 완료 후 <span class="kbd">Enter</span> 로 다음 구절'
+    : 'Type the verse exactly — press <span class="kbd">Enter</span> after completing';
+}
+
+function populateBooks() {
+  const sel = document.getElementById('book-sel');
+  sel.innerHTML = '';
+  Object.keys(BIBLE[lang]).forEach(b => {
+    const o = document.createElement('option'); o.value = b; o.textContent = b; sel.appendChild(o);
+  });
+  onBookChange();
+}
+
+function onBookChange() {
+  const book = document.getElementById('book-sel').value;
+  const sel = document.getElementById('chap-sel');
+  sel.innerHTML = '';
+  Object.keys(BIBLE[lang][book]).forEach(c => {
+    const o = document.createElement('option');
+    o.value = c;
+    o.textContent = lang === 'ko' ? c + '장' : 'Ch.' + c;
+    sel.appendChild(o);
+  });
+  loadChapter();
+}
+
+function loadChapter() {
+  const book = document.getElementById('book-sel').value;
+  const chap = document.getElementById('chap-sel').value;
+  const data = BIBLE[lang][book][chap];
+  verseKeys = Object.keys(data);
+  verses = verseKeys.map(k => data[k]);
+  currentIdx = 0;
+  doneCount = 0;
+  totalTypedChars = 0;
+  totalCorrectChars = 0;
+  chapterDone = false;
+  verseCompleted = false;
+  clearInterval(timerInterval);
+  startTime = null;
+
+  document.getElementById('chap-label').textContent =
+    lang === 'ko' ? `${book} ${chap}장` : `${book} Chapter ${chap}`;
+  document.getElementById('s-speed').textContent = '0';
+  document.getElementById('s-acc').textContent = '—';
+  document.getElementById('s-acc-u').textContent = '';
+  document.getElementById('s-done').textContent = '0';
+  document.getElementById('s-time').textContent = '0';
+  document.getElementById('prog-fill').style.width = '0%';
+  document.getElementById('prog-pct').textContent = '0%';
+  document.getElementById('done-banner').style.display = 'none';
+  document.getElementById('input').value = '';
+  document.getElementById('input').disabled = false;
+  document.getElementById('input').style.borderColor = '';
+
+  renderVerseList();
+  document.getElementById('input').focus();
+}
+
+function renderVerseList() {
+  const list = document.getElementById('verses-list');
+  list.innerHTML = '';
+  verses.forEach((v, i) => {
+    const row = document.createElement('div');
+    row.className = 'verse-row ' + (i < currentIdx ? 'done' : i === currentIdx ? 'active' : 'upcoming');
+    row.id = 'vrow-' + i;
+
+    const num = document.createElement('div');
+    num.className = 'verse-num';
+    num.textContent = verseKeys[i];
+
+    const text = document.createElement('div');
+    text.className = 'verse-text';
+    text.id = 'vtext-' + i;
+
+    if (i === currentIdx) {
+      renderChars(text, v, '');
+    } else {
+      text.textContent = v;
+    }
+
+    row.appendChild(num);
+    row.appendChild(text);
+    list.appendChild(row);
+  });
+}
+
+function renderChars(el, verse, typed) {
+  let html = '';
+  for (let i = 0; i < verse.length; i++) {
+    const ch = verse[i] === ' ' ? '\u00a0' : verse[i];
+    if (i < typed.length) {
+      const ok = typed[i] === verse[i];
+      html += `<span class="${ok ? 'char-correct' : 'char-wrong'}">${ch}</span>`;
+    } else if (i === typed.length) {
+      html += `<span class="cursor"></span><span>${ch}</span>`;
+    } else {
+      html += `<span>${ch}</span>`;
+    }
+  }
+  if (typed.length >= verse.length) html += '<span class="cursor"></span>';
+  el.innerHTML = html;
+}
+
+function onKeyDown(e) {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    if (verseCompleted) {
+      advanceToNext();
+    }
+  }
+}
+
+function onInput() {
+  if (chapterDone || verseCompleted) return;
+
+  const inp = document.getElementById('input');
+  const typed = inp.value;
+
+  // 타이머 시작
+  if (!startTime && typed.length > 0) {
+    startTime = Date.now();
+    timerInterval = setInterval(tickStats, 250);
+  }
+
+  const verse = verses[currentIdx];
+  const el = document.getElementById('vtext-' + currentIdx);
+  renderChars(el, verse, typed);
+
+  // 진행률 업데이트
+  const totalChars = verses.reduce((a, v) => a + v.length, 0);
+  const doneChars = verses.slice(0, currentIdx).reduce((a, v) => a + v.length, 0);
+  const prog = Math.min(100, Math.round(((doneChars + typed.length) / totalChars) * 100));
+  document.getElementById('prog-fill').style.width = prog + '%';
+  document.getElementById('prog-pct').textContent = prog + '%';
+
+  // 실시간 정확도/속도
+  updateLiveStats(typed, verse);
+
+  // 구절 완료 체크
+  if (typed === verse) {
+    verseCompleted = true;
+
+    // 이 구절의 통계를 누적
+    let correct = 0;
+    for (let i = 0; i < typed.length; i++) {
+      if (typed[i] === verse[i]) correct++;
+    }
+    totalTypedChars += typed.length;
+    totalCorrectChars += correct;
+    doneCount++;
+    document.getElementById('s-done').textContent = doneCount;
+
+    // 완료 시각 효과
+    inp.style.borderColor = 'var(--correct)';
+
+    if (currentIdx === verses.length - 1) {
+      // 마지막 구절 — 장 완료
+      finishChapter();
+    } else {
+      // Enter 안내
+      inp.placeholder = lang === 'ko' ? 'Enter ↵ 를 눌러 다음 구절로...' : 'Press Enter ↵ for next verse...';
+    }
+  }
+}
+
+function updateLiveStats(typed, verse) {
+  if (!startTime || typed.length === 0) return;
+  const elapsed = (Date.now() - startTime) / 1000; // 초
+  if (elapsed < 0.5) return;
+
+  // 타자 속도: (총 입력 글자 수 / 경과 시간(초)) × 60 = 분당 타수
+  const allTyped = totalTypedChars + typed.length;
+  const speed = Math.round((allTyped / elapsed) * 60);
+  document.getElementById('s-speed').textContent = speed;
+
+  // 정확도
+  let correct = 0;
+  for (let i = 0; i < typed.length; i++) {
+    if (typed[i] === verse[i]) correct++;
+  }
+  const allCorrect = totalCorrectChars + correct;
+  const acc = Math.round((allCorrect / allTyped) * 100);
+  document.getElementById('s-acc').textContent = acc;
+  document.getElementById('s-acc-u').textContent = '%';
+}
+
+function tickStats() {
+  if (!startTime) return;
+  const elapsed = Math.round((Date.now() - startTime) / 1000);
+  document.getElementById('s-time').textContent = elapsed;
+
+  const inp = document.getElementById('input').value;
+  const verse = verses[currentIdx] || '';
+  updateLiveStats(inp, verse);
+}
+
+function advanceToNext() {
+  if (currentIdx >= verses.length - 1) return;
+
+  // 이전 구절 done으로
+  document.getElementById('vrow-' + currentIdx).className = 'verse-row done';
+  document.getElementById('vtext-' + currentIdx).textContent = verses[currentIdx];
+
+  currentIdx++;
+  verseCompleted = false;
+
+  // 다음 구절 active
+  document.getElementById('vrow-' + currentIdx).className = 'verse-row active';
+  renderChars(document.getElementById('vtext-' + currentIdx), verses[currentIdx], '');
+
+  const inp = document.getElementById('input');
+  inp.value = '';
+  inp.style.borderColor = '';
+  inp.placeholder = lang === 'ko' ? '여기에 입력...' : 'Type here...';
+  inp.focus();
+
+  // 스크롤
+  setTimeout(() => {
+    document.getElementById('vrow-' + currentIdx).scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, 50);
+}
+
+function finishChapter() {
+  chapterDone = true;
+  clearInterval(timerInterval);
+  tickStats();
+
+  document.getElementById('input').disabled = true;
+  document.getElementById('vrow-' + currentIdx).className = 'verse-row done';
+  document.getElementById('vtext-' + currentIdx).textContent = verses[currentIdx];
+  document.getElementById('prog-fill').style.width = '100%';
+  document.getElementById('prog-pct').textContent = '100%';
+
+  const banner = document.getElementById('done-banner');
+  banner.style.display = 'block';
+  banner.textContent = lang === 'ko' ? '✦ 이 장을 완료했습니다 · 수고하셨습니다' : '✦ Chapter complete · Well done';
+}
+
+function resetChapter() {
+  clearInterval(timerInterval);
+  loadChapter();
+}
+
+function nextChapter() {
+  const chapSel = document.getElementById('chap-sel');
+  if (chapSel.selectedIndex < chapSel.options.length - 1) {
+    chapSel.selectedIndex++;
+    loadChapter();
+  } else {
+    const bookSel = document.getElementById('book-sel');
+    if (bookSel.selectedIndex < bookSel.options.length - 1) {
+      bookSel.selectedIndex++;
+      onBookChange();
+    }
+  }
+}
+
+// 초기화
+populateBooks();
+updateUIText();
+</script>
+</body>
+</html>
