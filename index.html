@@ -15,9 +15,9 @@
   --parchment-2: #ede8e0;
   --parchment-3: #e0d9ce;
   --gold: #c09a52;
-  --correct: #4a7c59;
-  --wrong: #a33a2e;
-  --wrong-bg: #fce8e6;
+  --correct: #1a6e3a;
+  --wrong: #c0392b;
+  --wrong-bg: #fde8e6;
   --done-opacity: 0.35;
   --upcoming-opacity: 0.25;
 }
@@ -267,7 +267,7 @@ select:focus { outline: none; border-color: var(--gold); }
   </div>
   <div class="stat-item">
     <div class="stat-label">경과 시간</div>
-    <div class="stat-val"><span id="s-time">0</span><span class="stat-unit">초</span></div>
+    <div class="stat-val"><span id="s-time">0:00</span></div>
   </div>
 </div>
 <div class="prog-bar"><div class="prog-fill" id="prog-fill"></div></div>
@@ -450,7 +450,7 @@ function loadChapter() {
   document.getElementById('s-acc').textContent = '—';
   document.getElementById('s-acc-u').textContent = '';
   document.getElementById('s-done').textContent = '0';
-  document.getElementById('s-time').textContent = '0';
+  document.getElementById('s-time').textContent = '0:00';
   document.getElementById('prog-fill').style.width = '0%';
   document.getElementById('done-banner').style.display = 'none';
   document.getElementById('hidden-input').value = '';
@@ -521,7 +521,8 @@ function onInput() {
     document.getElementById('hidden-input').value = '';
     return;
   }
-  const typed = document.getElementById('hidden-input').value;
+  const inp = document.getElementById('hidden-input');
+  const typed = inp.value;
 
   if (!startTime && typed.length > 0) {
     startTime = Date.now();
@@ -548,8 +549,9 @@ function onInput() {
     doneCount++;
     document.getElementById('s-done').textContent = doneCount;
     verseCompleted = true;
+    inp.value = ''; // 즉시 비워서 다음 onInput에 잔여 글자 안 남게
 
-    // show cursor at end as gold check
+    // ✦ 완료 표시
     const overlay = document.getElementById('voverlay-' + currentIdx);
     overlay.innerHTML += '<span style="color:var(--gold);font-family:\'EB Garamond\',serif;font-size:0.9em;margin-left:4px">✦</span>';
 
@@ -578,19 +580,24 @@ function updateLiveStats(typed) {
 
 function tickStats() {
   if (!startTime) return;
-  document.getElementById('s-time').textContent = Math.round((Date.now() - startTime) / 1000);
+  const totalSec = Math.floor((Date.now() - startTime) / 1000);
+  const m = Math.floor(totalSec / 60);
+  const s = String(totalSec % 60).padStart(2, '0');
+  document.getElementById('s-time').textContent = m + ':' + s;
   updateLiveStats(document.getElementById('hidden-input').value);
 }
 
 function advanceToNext() {
-  // 이전 구절 done
   document.getElementById('vrow-' + currentIdx).className = 'verse-row done';
-  document.getElementById('voverlay-' + currentIdx).innerHTML = ''; // overlay 제거, ghost만 남음
+  document.getElementById('voverlay-' + currentIdx).innerHTML = '';
   currentIdx++;
   verseCompleted = false;
   document.getElementById('vrow-' + currentIdx).className = 'verse-row active';
-  document.getElementById('hidden-input').value = '';
+  // value를 먼저 비우고, 그 후 onInput이 트리거되지 않도록 플래그
+  const inp = document.getElementById('hidden-input');
+  inp.value = '';
   renderOverlay(currentIdx, '');
+  inp.focus();
   setTimeout(() => {
     document.getElementById('vrow-' + currentIdx).scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }, 50);
