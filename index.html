@@ -18,8 +18,9 @@
   --correct: #1a6e3a;
   --wrong: #c0392b;
   --wrong-bg: #fde8e6;
-  --done-opacity: 0.35;
-  --upcoming-opacity: 0.25;
+  --upcoming: #c8bfb2;
+  --done-opacity: 0.32;
+  --upcoming-opacity: 0.28;
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body { background: var(--parchment); color: var(--ink); font-family: 'Noto Sans KR', sans-serif; min-height: 100vh; }
@@ -60,12 +61,9 @@ select:focus { outline: none; border-color: var(--gold); }
   align-items: center;
 }
 .stat-item { padding: 0.6rem 1.5rem 0.6rem 0; margin-right: 1.5rem; border-right: 1px solid var(--parchment-3); }
-.stat-item:last-child { border-right: none; }
 .stat-label { font-size: 10px; color: var(--ink-3); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 1px; }
 .stat-val { font-family: 'EB Garamond', serif; font-size: 22px; font-weight: 600; color: var(--ink); line-height: 1; }
 .stat-unit { font-size: 12px; font-weight: 400; color: var(--ink-3); margin-left: 2px; }
-
-/* PAUSE BUTTON in statsbar */
 .pause-btn {
   margin-left: auto;
   font-size: 12px; padding: 5px 14px; border-radius: 99px;
@@ -78,25 +76,17 @@ select:focus { outline: none; border-color: var(--gold); }
 
 /* PAUSE OVERLAY */
 .pause-overlay {
-  display: none;
-  position: fixed; inset: 0; z-index: 100;
-  background: rgba(247,243,237,0.92);
-  backdrop-filter: blur(4px);
-  align-items: center; justify-content: center;
-  flex-direction: column; gap: 1rem;
+  display: none; position: fixed; inset: 0; z-index: 100;
+  background: rgba(247,243,237,0.93); backdrop-filter: blur(4px);
+  align-items: center; justify-content: center; flex-direction: column; gap: 1rem;
 }
 .pause-overlay.active { display: flex; }
-.pause-overlay-title {
-  font-family: 'EB Garamond', serif;
-  font-size: 28px; font-style: italic; color: var(--gold);
-}
+.pause-overlay-title { font-family: 'EB Garamond', serif; font-size: 28px; font-style: italic; color: var(--gold); }
 .pause-overlay-sub { font-size: 13px; color: var(--ink-3); }
 .resume-btn {
-  margin-top: 0.5rem;
-  font-size: 14px; padding: 10px 28px; border-radius: 99px;
+  margin-top: 0.5rem; font-size: 14px; padding: 10px 28px; border-radius: 99px;
   border: none; background: var(--ink); color: var(--parchment);
-  cursor: pointer; font-family: 'Noto Sans KR', sans-serif;
-  transition: background 0.15s;
+  cursor: pointer; font-family: 'Noto Sans KR', sans-serif; transition: background 0.15s;
 }
 .resume-btn:hover { background: var(--ink-2); }
 
@@ -116,38 +106,74 @@ select:focus { outline: none; border-color: var(--gold); }
 /* VERSE ROWS */
 .verse-row {
   display: flex; gap: 16px; align-items: flex-start;
-  padding: 0.65rem 0; border-bottom: 1px solid var(--parchment-2);
-  transition: opacity 0.3s ease; position: relative;
+  padding: 0.75rem 0; border-bottom: 1px solid var(--parchment-2);
+  transition: opacity 0.3s ease;
 }
 .verse-row:last-child { border-bottom: none; }
-.verse-row.done { opacity: var(--done-opacity); pointer-events: none; }
-.verse-row.upcoming { opacity: var(--upcoming-opacity); pointer-events: none; }
+.verse-row.done { opacity: var(--done-opacity); }
+.verse-row.upcoming { opacity: var(--upcoming-opacity); }
 .verse-row.active { opacity: 1; }
+
 .verse-num {
   font-family: 'EB Garamond', serif; font-size: 13px; color: var(--gold);
-  min-width: 22px; padding-top: 5px; font-style: italic; user-select: none;
+  min-width: 22px; padding-top: 5px; font-style: italic; user-select: none; flex-shrink: 0;
 }
-.verse-body { flex: 1; position: relative; font-family: 'Noto Serif KR', serif; font-size: 17px; line-height: 1.95; }
-.verse-ghost { color: var(--parchment-3); user-select: none; white-space: pre-wrap; word-break: break-all; }
-.verse-overlay { position: absolute; top: 0; left: 0; white-space: pre-wrap; word-break: break-all; pointer-events: none; }
-.char-correct { color: var(--correct); }
-.char-wrong { color: var(--wrong); background: var(--wrong-bg); border-radius: 2px; }
-.cursor {
-  display: inline-block; width: 2px; height: 1em;
-  background: var(--gold); vertical-align: text-bottom;
-  animation: blink 1s step-end infinite; margin: 0 0.5px; border-radius: 1px;
+
+/* 핵심: 원문 span들을 직접 색칠 */
+.verse-text {
+  flex: 1;
+  font-family: 'Noto Serif KR', serif;
+  font-size: 18px;
+  line-height: 2;
+  letter-spacing: 0.01em;
+  word-break: keep-all;
+}
+
+/* 상태별 글자 색상 */
+.verse-text .ch { color: var(--upcoming); transition: color 0.05s; }
+.verse-text .ch.correct { color: var(--correct); }
+.verse-text .ch.wrong { color: var(--wrong); background: var(--wrong-bg); border-radius: 2px; }
+.verse-text .ch.composing { color: var(--ink-2); border-bottom: 2px solid var(--gold); }
+
+.cursor-char {
+  display: inline-block;
+  width: 0; height: 1em;
+  border-left: 2px solid var(--gold);
+  vertical-align: text-bottom;
+  animation: blink 1s step-end infinite;
+  margin-left: 1px;
 }
 @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
 
-.hidden-input { position: fixed; opacity: 0; pointer-events: none; width: 1px; height: 1px; top: -100px; left: -100px; }
+/* 완료 구절: 원문 색으로 돌아감 */
+.verse-row.done .verse-text .ch { color: var(--ink-2); }
 
-.focus-hint { font-size: 12px; color: var(--ink-3); text-align: center; margin-top: 2rem; display: flex; align-items: center; justify-content: center; gap: 6px; }
+/* 아직 안 한 구절: 연하게 */
+.verse-row.upcoming .verse-text .ch { color: var(--upcoming); }
+
+.hidden-input {
+  position: fixed; opacity: 0; pointer-events: none;
+  width: 1px; height: 1px; top: -100px; left: -100px;
+}
+
+.focus-hint {
+  font-size: 12px; color: var(--ink-3); text-align: center;
+  margin-top: 2rem; display: flex; align-items: center; justify-content: center; gap: 6px;
+}
 .kbd { background: var(--parchment-3); border-radius: 4px; padding: 1px 7px; font-size: 11px; font-family: monospace; color: var(--ink-2); }
 
-.done-banner { display: none; text-align: center; padding: 1.25rem; background: var(--correct); color: white; border-radius: 10px; font-size: 14px; font-weight: 500; margin-top: 2rem; line-height: 1.6; }
+.done-banner {
+  display: none; text-align: center; padding: 1.25rem;
+  background: var(--correct); color: white; border-radius: 10px;
+  font-size: 14px; font-weight: 500; margin-top: 2rem; line-height: 1.6;
+}
 
 .btn-row { display: flex; gap: 8px; margin-top: 2rem; }
-.btn { font-size: 13px; padding: 8px 18px; border-radius: 8px; border: 1px solid var(--parchment-3); background: var(--parchment-2); color: var(--ink-2); cursor: pointer; font-family: 'Noto Sans KR', sans-serif; transition: all 0.15s; }
+.btn {
+  font-size: 13px; padding: 8px 18px; border-radius: 8px;
+  border: 1px solid var(--parchment-3); background: var(--parchment-2);
+  color: var(--ink-2); cursor: pointer; font-family: 'Noto Sans KR', sans-serif; transition: all 0.15s;
+}
 .btn:hover { background: var(--parchment-3); color: var(--ink); }
 .btn-primary { background: var(--ink); color: var(--parchment); border-color: var(--ink); }
 .btn-primary:hover { background: var(--ink-2); }
@@ -156,7 +182,7 @@ select:focus { outline: none; border-color: var(--gold); }
   .topbar { padding: 0 1rem; gap: 6px; }
   .main { padding: 1.5rem 1rem 5rem; }
   .statsbar { padding: 0 1rem; overflow-x: auto; }
-  .verse-body { font-size: 15px; }
+  .verse-text { font-size: 16px; }
 }
 </style>
 </head>
@@ -193,7 +219,6 @@ select:focus { outline: none; border-color: var(--gold); }
 </div>
 <div class="prog-bar"><div class="prog-fill" id="prog-fill"></div></div>
 
-<!-- PAUSE OVERLAY -->
 <div class="pause-overlay" id="pause-overlay">
   <div class="pause-overlay-title">잠시 멈춤</div>
   <div class="pause-overlay-sub">계속하려면 아래 버튼을 누르세요</div>
@@ -213,7 +238,8 @@ select:focus { outline: none; border-color: var(--gold); }
   </div>
 </div>
 
-<textarea class="hidden-input" id="hidden-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+<textarea class="hidden-input" id="hidden-input"
+  autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
 
 <script>
 const BIBLE = {
@@ -301,28 +327,7 @@ const BIBLE = {
         7:"So God made the vault and separated the water under the vault from the water above it. And it was so.",
         8:"God called the vault sky. And there was evening, and there was morning, the second day.",
         9:"And God said, Let the water under the sky be gathered to one place, and let dry ground appear. And it was so.",
-        10:"God called the dry ground land, and the gathered waters he called seas. And God saw that it was good.",
-        11:"Then God said, Let the land produce vegetation: seed-bearing plants and trees on the land that bear fruit with seed in it, according to their various kinds. And it was so.",
-        12:"The land produced vegetation: plants bearing seed according to their kinds and trees bearing fruit with seed in it according to their kinds. And God saw that it was good.",
-        13:"And there was evening, and there was morning, the third day.",
-        14:"And God said, Let there be lights in the vault of the sky to separate the day from the night, and let them serve as signs to mark sacred times, and days and years.",
-        15:"and let them be lights in the vault of the sky to give light on the earth. And it was so.",
-        16:"God made two great lights, the greater light to govern the day and the lesser light to govern the night. He also made the stars.",
-        17:"God set them in the vault of the sky to give light on the earth,",
-        18:"to govern the day and the night, and to separate light from darkness. And God saw that it was good.",
-        19:"And there was evening, and there was morning, the fourth day.",
-        20:"And God said, Let the water teem with living creatures, and let birds fly above the earth across the vault of the sky.",
-        21:"So God created the great creatures of the sea and every living thing with which the water teems and that moves about in it, according to their kinds, and every winged bird according to its kind. And God saw that it was good.",
-        22:"God blessed them and said, Be fruitful and increase in number and fill the water in the seas, and let the birds increase on the earth.",
-        23:"And there was evening, and there was morning, the fifth day.",
-        24:"And God said, Let the land produce living creatures according to their kinds: the livestock, the creatures that move along the ground, and the wild animals, each according to its kind. And it was so.",
-        25:"God made the wild animals according to their kinds, the livestock according to their kinds, and all the creatures that move along the ground according to their kinds. And God saw that it was good.",
-        26:"Then God said, Let us make mankind in our image, in our likeness, so that they may rule over the fish in the sea and the birds in the sky, over the livestock and all the wild animals, and over all the creatures that move along the ground.",
-        27:"So God created mankind in his own image, in the image of God he created them; male and female he created them.",
-        28:"God blessed them and said to them, Be fruitful and increase in number; fill the earth and subdue it. Rule over the fish in the sea and the birds in the sky and over every living creature that moves on the ground.",
-        29:"Then God said, I give you every seed-bearing plant on the face of the whole earth and every tree that has fruit with seed in it. They will be yours for food.",
-        30:"And to all the beasts of the earth and all the birds in the sky and all the creatures that move along the ground, everything that has the breath of life in it, I give every green plant for food. And it was so.",
-        31:"God saw all that he had made, and it was very good. And there was evening, and there was morning, the sixth day."
+        10:"God called the dry ground land, and the gathered waters he called seas. And God saw that it was good."
       },
       2: {
         1:"Thus the heavens and the earth were completed in all their vast array.",
@@ -363,62 +368,249 @@ const BIBLE = {
   }
 };
 
+// ── 상태 ──
 let lang = 'ko';
 let verses = [], verseKeys = [];
 let currentIdx = 0;
 let startTime = null, timerInterval = null;
-let totalTypedChars = 0, totalCorrectChars = 0;
+let totalCompletedChars = 0;   // 완료 구절 글자 수 합계
+let totalCorrectChars = 0;
 let doneCount = 0;
 let chapterDone = false;
 let verseCompleted = false;
 let isPaused = false;
-let pausedElapsed = 0; // 일시정지까지 누적 경과시간(ms)
-let pauseStart = null;
 
-// focus
-document.body.addEventListener('click', (e) => {
-  if (!chapterDone && !isPaused && !e.target.closest('select') && !e.target.closest('button')) {
+// 한글 조합 상태 추적
+let isComposing = false;
+let composingChar = '';   // 조합 중인 글자 (1자)
+let committedText = '';   // 조합 완료된 텍스트 (현재 구절 내)
+
+// ── 클릭 포커스 ──
+document.body.addEventListener('click', e => {
+  if (!chapterDone && !isPaused && !e.target.closest('button') && !e.target.closest('select')) {
     document.getElementById('hidden-input').focus();
   }
 });
-document.getElementById('hidden-input').addEventListener('input', onInput);
-document.getElementById('hidden-input').addEventListener('keydown', onKeyDown);
 
-// ESC로도 일시정지
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') togglePause();
-});
+// ── 이벤트 바인딩 ──
+const inp = document.getElementById('hidden-input');
+inp.addEventListener('compositionstart', onCompositionStart);
+inp.addEventListener('compositionupdate', onCompositionUpdate);
+inp.addEventListener('compositionend', onCompositionEnd);
+inp.addEventListener('input', onInput);
+inp.addEventListener('keydown', onKeyDown);
 
+function onCompositionStart() {
+  isComposing = true;
+  composingChar = '';
+}
+function onCompositionUpdate(e) {
+  composingChar = e.data || '';
+  renderVerse(currentIdx);
+}
+function onCompositionEnd(e) {
+  isComposing = false;
+  composingChar = '';
+  // compositionend 후 inp.value 에 완성된 글자가 포함됨
+  committedText = inp.value;
+  renderVerse(currentIdx);
+  checkVerseComplete();
+}
+
+function onKeyDown(e) {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    if (verseCompleted && !chapterDone) advanceToNext();
+  }
+  if (e.key === 'Backspace' && !isComposing) {
+    // backspace: committedText에서 한 글자 제거
+    committedText = committedText.slice(0, -1);
+  }
+}
+
+function onInput() {
+  if (chapterDone || verseCompleted) {
+    inp.value = committedText;
+    return;
+  }
+  if (isComposing) return; // compositionupdate가 처리
+
+  if (!startTime && inp.value.length > 0) {
+    startTime = Date.now();
+    timerInterval = setInterval(tickStats, 300);
+  }
+
+  committedText = inp.value;
+  renderVerse(currentIdx);
+  updateProgress();
+  updateLiveStats();
+  checkVerseComplete();
+}
+
+function checkVerseComplete() {
+  const verse = verses[currentIdx];
+  const full = committedText + (isComposing ? composingChar : '');
+  if (committedText === verse && !isComposing) {
+    // 완료!
+    let correct = 0;
+    for (let i = 0; i < verse.length; i++) {
+      if (committedText[i] === verse[i]) correct++;
+    }
+    totalCompletedChars += verse.length;
+    totalCorrectChars += correct;
+    doneCount++;
+    document.getElementById('s-done').textContent = doneCount;
+    verseCompleted = true;
+    inp.value = '';
+    committedText = '';
+
+    // ✦ 완료 표시
+    const el = document.getElementById('vtext-' + currentIdx);
+    el.innerHTML += '<span style="color:var(--gold);font-family:\'EB Garamond\',serif;font-size:0.85em;margin-left:6px">✦</span>';
+
+    if (currentIdx === verses.length - 1) finishChapter();
+  }
+}
+
+// ── 렌더링: 원문 span 직접 색칠 ──
+function buildVerseSpans(idx) {
+  const verse = verses[idx];
+  const el = document.getElementById('vtext-' + idx);
+  el.innerHTML = '';
+  for (let i = 0; i < verse.length; i++) {
+    const span = document.createElement('span');
+    span.className = 'ch';
+    span.id = `ch-${idx}-${i}`;
+    span.textContent = verse[i];
+    el.appendChild(span);
+  }
+  // 커서
+  const cur = document.createElement('span');
+  cur.className = 'cursor-char';
+  cur.id = `cursor-${idx}`;
+  el.appendChild(cur);
+}
+
+function renderVerse(idx) {
+  const verse = verses[idx];
+  // committedText + composingChar 합쳐서 비교
+  const typed = committedText;
+
+  for (let i = 0; i < verse.length; i++) {
+    const span = document.getElementById(`ch-${idx}-${i}`);
+    if (!span) continue;
+    if (i < typed.length) {
+      span.className = typed[i] === verse[i] ? 'ch correct' : 'ch wrong';
+    } else if (isComposing && i === typed.length) {
+      // 조합 중인 글자
+      span.className = 'ch composing';
+      span.textContent = composingChar || verse[i];
+    } else {
+      span.className = 'ch';
+      span.textContent = verse[i];
+    }
+  }
+
+  // 커서 위치
+  const cursorEl = document.getElementById(`cursor-${idx}`);
+  if (cursorEl) {
+    const pos = isComposing ? typed.length + 1 : typed.length;
+    const refSpan = document.getElementById(`ch-${idx}-${pos}`);
+    if (refSpan) refSpan.before(cursorEl);
+    else document.getElementById('vtext-' + idx).appendChild(cursorEl);
+  }
+}
+
+function updateProgress() {
+  const totalChars = verses.reduce((a, v) => a + v.length, 0);
+  const doneChars = verses.slice(0, currentIdx).reduce((a, v) => a + v.length, 0);
+  const prog = Math.min(100, Math.round(((doneChars + committedText.length) / totalChars) * 100));
+  document.getElementById('prog-fill').style.width = prog + '%';
+}
+
+function updateLiveStats() {
+  if (!startTime) return;
+  const elapsed = (Date.now() - startTime) / 1000;
+  if (elapsed < 0.3) return;
+  // 타자속도: 완료된 글자 + 현재 입력 중인 글자 (조합 완료된 것만)
+  const allTyped = totalCompletedChars + committedText.length;
+  if (allTyped === 0) return;
+  const speed = Math.round((allTyped / elapsed) * 60);
+  document.getElementById('s-speed').textContent = speed;
+
+  let correct = 0;
+  const verse = verses[currentIdx];
+  for (let i = 0; i < committedText.length; i++) {
+    if (committedText[i] === verse[i]) correct++;
+  }
+  const acc = allTyped > 0 ? Math.round(((totalCorrectChars + correct) / allTyped) * 100) : 0;
+  document.getElementById('s-acc').textContent = acc;
+  document.getElementById('s-acc-u').textContent = '%';
+}
+
+function tickStats() {
+  if (!startTime || isPaused) return;
+  const totalSec = Math.floor((Date.now() - startTime) / 1000);
+  const m = Math.floor(totalSec / 60);
+  const s = String(totalSec % 60).padStart(2, '0');
+  document.getElementById('s-time').textContent = m + ':' + s;
+  updateLiveStats();
+}
+
+// ── 다음 구절로 ──
+function advanceToNext() {
+  document.getElementById('vrow-' + currentIdx).className = 'verse-row done';
+  currentIdx++;
+  verseCompleted = false;
+  committedText = '';
+  isComposing = false;
+  composingChar = '';
+  inp.value = '';
+
+  document.getElementById('vrow-' + currentIdx).className = 'verse-row active';
+  buildVerseSpans(currentIdx);
+  renderVerse(currentIdx);
+  inp.focus();
+
+  // 현재 구절 화면 중앙으로
+  setTimeout(() => {
+    const row = document.getElementById('vrow-' + currentIdx);
+    row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 60);
+}
+
+// ── 장 완료 ──
+function finishChapter() {
+  chapterDone = true;
+  clearInterval(timerInterval);
+  tickStats();
+  document.getElementById('vrow-' + currentIdx).className = 'verse-row done';
+  document.getElementById('prog-fill').style.width = '100%';
+  const banner = document.getElementById('done-banner');
+  banner.style.display = 'block';
+  banner.textContent = lang === 'ko' ? '✦ 이 장을 완료했습니다 · 수고하셨습니다' : '✦ Chapter complete · Well done';
+}
+
+// ── 일시정지 ──
 function togglePause() {
-  if (chapterDone) return;
   isPaused = !isPaused;
   const overlay = document.getElementById('pause-overlay');
   const btn = document.getElementById('pause-btn');
-
   if (isPaused) {
     overlay.classList.add('active');
     btn.classList.add('paused');
     btn.textContent = '▶ 계속하기';
-    // 경과 시간 누적 저장
-    if (startTime) {
-      pausedElapsed += Date.now() - startTime;
-      startTime = null;
-    }
     clearInterval(timerInterval);
-    timerInterval = null;
   } else {
     overlay.classList.remove('active');
     btn.classList.remove('paused');
     btn.textContent = '⏸ 일시정지';
-    // 재개: startTime 리셋
-    if (pausedElapsed > 0 || totalTypedChars > 0) {
-      startTime = Date.now();
-      timerInterval = setInterval(tickStats, 250);
-    }
-    document.getElementById('hidden-input').focus();
+    if (startTime) timerInterval = setInterval(tickStats, 300);
+    inp.focus();
   }
 }
 
+// ── 언어 / 책 / 장 ──
 function setLang(l, btn) {
   lang = l;
   document.querySelectorAll('.lang-tab').forEach(b => b.classList.remove('active'));
@@ -427,10 +619,6 @@ function setLang(l, btn) {
   document.getElementById('focus-hint').innerHTML = l === 'ko'
     ? '화면을 클릭하면 입력 시작 · 구절 완료 후 <span class="kbd">Enter</span> 로 다음 구절'
     : 'Click to start · Press <span class="kbd">Enter</span> after each verse';
-  document.querySelector('.pause-btn').textContent = '⏸ ' + (l === 'ko' ? '일시정지' : 'Pause');
-  document.querySelector('.resume-btn').textContent = '▶ ' + (l === 'ko' ? '계속하기' : 'Resume');
-  document.querySelector('.pause-overlay-title').textContent = l === 'ko' ? '잠시 멈춤' : 'Paused';
-  document.querySelector('.pause-overlay-sub').textContent = l === 'ko' ? '계속하려면 아래 버튼을 누르세요' : 'Press the button below to resume';
   populateBooks();
 }
 
@@ -463,15 +651,16 @@ function loadChapter() {
   verseKeys = Object.keys(data);
   verses = verseKeys.map(k => data[k]);
   currentIdx = 0; doneCount = 0;
-  totalTypedChars = 0; totalCorrectChars = 0;
-  chapterDone = false; verseCompleted = false;
-  isPaused = false; pausedElapsed = 0; pauseStart = null;
-  clearInterval(timerInterval); startTime = null; timerInterval = null;
+  totalCompletedChars = 0; totalCorrectChars = 0;
+  chapterDone = false; verseCompleted = false; isPaused = false;
+  isComposing = false; composingChar = ''; committedText = '';
+  clearInterval(timerInterval); startTime = null;
 
   document.getElementById('pause-overlay').classList.remove('active');
   document.getElementById('pause-btn').classList.remove('paused');
-  document.getElementById('pause-btn').textContent = '⏸ ' + (lang === 'ko' ? '일시정지' : 'Pause');
-  document.getElementById('chap-label').textContent = lang === 'ko' ? `${book} ${chap}장` : `${book} Chapter ${chap}`;
+  document.getElementById('pause-btn').textContent = '⏸ 일시정지';
+  document.getElementById('chap-label').textContent =
+    lang === 'ko' ? `${book} ${chap}장` : `${book} Chapter ${chap}`;
   document.getElementById('s-speed').textContent = '0';
   document.getElementById('s-acc').textContent = '—';
   document.getElementById('s-acc-u').textContent = '';
@@ -479,10 +668,10 @@ function loadChapter() {
   document.getElementById('s-time').textContent = '0:00';
   document.getElementById('prog-fill').style.width = '0%';
   document.getElementById('done-banner').style.display = 'none';
-  document.getElementById('hidden-input').value = '';
+  inp.value = '';
 
   renderAll();
-  document.getElementById('hidden-input').focus();
+  inp.focus();
 }
 
 function renderAll() {
@@ -490,137 +679,24 @@ function renderAll() {
   list.innerHTML = '';
   verses.forEach((v, i) => {
     const row = document.createElement('div');
-    row.className = 'verse-row ' + (i < currentIdx ? 'done' : i === currentIdx ? 'active' : 'upcoming');
+    row.className = 'verse-row ' + (i === 0 ? 'active' : 'upcoming');
     row.id = 'vrow-' + i;
+
     const num = document.createElement('div');
-    num.className = 'verse-num'; num.textContent = verseKeys[i];
-    const body = document.createElement('div');
-    body.className = 'verse-body'; body.id = 'vbody-' + i;
-    const ghost = document.createElement('div');
-    ghost.className = 'verse-ghost'; ghost.id = 'vghost-' + i; ghost.textContent = v;
-    const overlay = document.createElement('div');
-    overlay.className = 'verse-overlay'; overlay.id = 'voverlay-' + i;
-    body.appendChild(ghost); body.appendChild(overlay);
-    row.appendChild(num); row.appendChild(body);
+    num.className = 'verse-num';
+    num.textContent = verseKeys[i];
+
+    const text = document.createElement('div');
+    text.className = 'verse-text';
+    text.id = 'vtext-' + i;
+
+    row.appendChild(num);
+    row.appendChild(text);
     list.appendChild(row);
+
+    buildVerseSpans(i);
   });
-}
-
-function renderOverlay(idx, typed) {
-  const verse = verses[idx];
-  const overlay = document.getElementById('voverlay-' + idx);
-  let html = '';
-  for (let i = 0; i < typed.length; i++) {
-    const ok = typed[i] === verse[i];
-    const ch = typed[i] === ' ' ? '\u00a0' : typed[i];
-    html += `<span class="${ok ? 'char-correct' : 'char-wrong'}">${ch}</span>`;
-  }
-  if (typed.length < verse.length) html += '<span class="cursor"></span>';
-  overlay.innerHTML = html;
-}
-
-function onKeyDown(e) {
-  if (e.key === 'Enter') {
-    e.preventDefault();
-    if (verseCompleted && !chapterDone && !isPaused) advanceToNext();
-  }
-}
-
-function getElapsed() {
-  // 총 경과시간(ms) = 누적 + 현재 세션
-  return pausedElapsed + (startTime ? Date.now() - startTime : 0);
-}
-
-function onInput() {
-  if (chapterDone || verseCompleted || isPaused) {
-    document.getElementById('hidden-input').value = '';
-    return;
-  }
-  const inp = document.getElementById('hidden-input');
-  const typed = inp.value;
-
-  if (!startTime && typed.length > 0) {
-    startTime = Date.now();
-    timerInterval = setInterval(tickStats, 250);
-  }
-
-  renderOverlay(currentIdx, typed);
-
-  const totalChars = verses.reduce((a, v) => a + v.length, 0);
-  const doneChars = verses.slice(0, currentIdx).reduce((a, v) => a + v.length, 0);
-  const prog = Math.min(100, Math.round(((doneChars + typed.length) / totalChars) * 100));
-  document.getElementById('prog-fill').style.width = prog + '%';
-
-  updateLiveStats(typed);
-
-  if (typed === verses[currentIdx]) {
-    let correct = 0;
-    for (let i = 0; i < typed.length; i++) {
-      if (typed[i] === verses[currentIdx][i]) correct++;
-    }
-    totalTypedChars += typed.length;
-    totalCorrectChars += correct;
-    doneCount++;
-    document.getElementById('s-done').textContent = doneCount;
-    verseCompleted = true;
-    inp.value = '';
-
-    const overlay = document.getElementById('voverlay-' + currentIdx);
-    overlay.innerHTML += '<span style="color:var(--gold);font-family:\'EB Garamond\',serif;font-size:0.9em;margin-left:4px">✦</span>';
-
-    if (currentIdx === verses.length - 1) finishChapter();
-  }
-}
-
-function updateLiveStats(typed) {
-  const elapsed = getElapsed() / 1000;
-  if (elapsed < 0.3) return;
-  const allTyped = totalTypedChars + typed.length;
-  if (allTyped === 0) return;
-  const speed = Math.round((allTyped / elapsed) * 60);
-  document.getElementById('s-speed').textContent = speed;
-  let correct = 0;
-  for (let i = 0; i < typed.length; i++) {
-    if (typed[i] === verses[currentIdx][i]) correct++;
-  }
-  const acc = Math.round(((totalCorrectChars + correct) / allTyped) * 100);
-  document.getElementById('s-acc').textContent = acc;
-  document.getElementById('s-acc-u').textContent = '%';
-}
-
-function tickStats() {
-  if (isPaused) return;
-  const totalSec = Math.floor(getElapsed() / 1000);
-  const m = Math.floor(totalSec / 60);
-  const s = String(totalSec % 60).padStart(2, '0');
-  document.getElementById('s-time').textContent = m + ':' + s;
-  updateLiveStats(document.getElementById('hidden-input').value);
-}
-
-function advanceToNext() {
-  document.getElementById('vrow-' + currentIdx).className = 'verse-row done';
-  document.getElementById('voverlay-' + currentIdx).innerHTML = '';
-  currentIdx++;
-  verseCompleted = false;
-  document.getElementById('vrow-' + currentIdx).className = 'verse-row active';
-  const inp = document.getElementById('hidden-input');
-  inp.value = '';
-  renderOverlay(currentIdx, '');
-  inp.focus();
-  setTimeout(() => {
-    document.getElementById('vrow-' + currentIdx).scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  }, 50);
-}
-
-function finishChapter() {
-  chapterDone = true;
-  clearInterval(timerInterval);
-  tickStats();
-  document.getElementById('vrow-' + currentIdx).className = 'verse-row done';
-  document.getElementById('prog-fill').style.width = '100%';
-  const banner = document.getElementById('done-banner');
-  banner.style.display = 'block';
-  banner.textContent = lang === 'ko' ? '✦ 이 장을 완료했습니다 · 수고하셨습니다' : '✦ Chapter complete · Well done';
+  renderVerse(0);
 }
 
 function resetChapter() { clearInterval(timerInterval); loadChapter(); }
