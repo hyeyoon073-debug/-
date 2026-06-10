@@ -22,212 +22,132 @@
   --upcoming-opacity: 0.25;
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body {
-  background: var(--parchment);
-  color: var(--ink);
-  font-family: 'Noto Sans KR', sans-serif;
-  min-height: 100vh;
-}
+body { background: var(--parchment); color: var(--ink); font-family: 'Noto Sans KR', sans-serif; min-height: 100vh; }
 
 /* TOP BAR */
 .topbar {
   border-bottom: 1px solid var(--parchment-3);
   padding: 0 2rem;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  height: 54px;
-  background: var(--parchment);
-  position: sticky;
-  top: 0;
-  z-index: 10;
+  display: flex; align-items: center; gap: 1rem;
+  height: 54px; background: var(--parchment);
+  position: sticky; top: 0; z-index: 10;
 }
-.logo {
-  font-family: 'EB Garamond', serif;
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--ink);
-  margin-right: 4px;
-  white-space: nowrap;
-}
+.logo { font-family: 'EB Garamond', serif; font-size: 18px; font-weight: 600; color: var(--ink); margin-right: 4px; white-space: nowrap; }
 .logo em { font-style: italic; color: var(--gold); }
 select {
-  font-size: 13px;
-  padding: 5px 26px 5px 10px;
-  border-radius: 6px;
-  border: 1px solid var(--parchment-3);
-  background: var(--parchment-2);
-  color: var(--ink);
-  cursor: pointer;
-  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 13px; padding: 5px 26px 5px 10px; border-radius: 6px;
+  border: 1px solid var(--parchment-3); background: var(--parchment-2);
+  color: var(--ink); cursor: pointer; font-family: 'Noto Sans KR', sans-serif;
   appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%238a837a' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 8px center;
+  background-repeat: no-repeat; background-position: right 8px center;
 }
 select:focus { outline: none; border-color: var(--gold); }
 .lang-tabs { display: flex; gap: 4px; margin-left: auto; }
 .lang-tab {
   font-size: 12px; padding: 4px 12px; border-radius: 99px;
   border: 1px solid var(--parchment-3); background: transparent;
-  color: var(--ink-3); cursor: pointer; font-family: 'Noto Sans KR', sans-serif;
-  transition: all 0.15s;
+  color: var(--ink-3); cursor: pointer; font-family: 'Noto Sans KR', sans-serif; transition: all 0.15s;
 }
 .lang-tab.active { background: var(--ink); color: var(--parchment); border-color: var(--ink); }
 .lang-tab:hover:not(.active) { background: var(--parchment-2); }
 
 /* STATS BAR */
 .statsbar {
-  display: flex;
-  gap: 0;
+  display: flex; gap: 0;
   border-bottom: 1px solid var(--parchment-3);
-  background: var(--parchment);
-  padding: 0 2rem;
+  background: var(--parchment); padding: 0 2rem;
+  align-items: center;
 }
-.stat-item {
-  padding: 0.6rem 1.5rem 0.6rem 0;
-  margin-right: 1.5rem;
-  border-right: 1px solid var(--parchment-3);
-  last-child { border-right: none; }
-}
+.stat-item { padding: 0.6rem 1.5rem 0.6rem 0; margin-right: 1.5rem; border-right: 1px solid var(--parchment-3); }
 .stat-item:last-child { border-right: none; }
 .stat-label { font-size: 10px; color: var(--ink-3); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 1px; }
-.stat-val {
-  font-family: 'EB Garamond', serif;
-  font-size: 22px; font-weight: 600; color: var(--ink); line-height: 1;
-}
+.stat-val { font-family: 'EB Garamond', serif; font-size: 22px; font-weight: 600; color: var(--ink); line-height: 1; }
 .stat-unit { font-size: 12px; font-weight: 400; color: var(--ink-3); margin-left: 2px; }
+
+/* PAUSE BUTTON in statsbar */
+.pause-btn {
+  margin-left: auto;
+  font-size: 12px; padding: 5px 14px; border-radius: 99px;
+  border: 1px solid var(--parchment-3); background: transparent;
+  color: var(--ink-2); cursor: pointer; font-family: 'Noto Sans KR', sans-serif;
+  transition: all 0.15s; white-space: nowrap;
+}
+.pause-btn:hover { background: var(--parchment-2); }
+.pause-btn.paused { background: var(--gold); color: white; border-color: var(--gold); }
+
+/* PAUSE OVERLAY */
+.pause-overlay {
+  display: none;
+  position: fixed; inset: 0; z-index: 100;
+  background: rgba(247,243,237,0.92);
+  backdrop-filter: blur(4px);
+  align-items: center; justify-content: center;
+  flex-direction: column; gap: 1rem;
+}
+.pause-overlay.active { display: flex; }
+.pause-overlay-title {
+  font-family: 'EB Garamond', serif;
+  font-size: 28px; font-style: italic; color: var(--gold);
+}
+.pause-overlay-sub { font-size: 13px; color: var(--ink-3); }
+.resume-btn {
+  margin-top: 0.5rem;
+  font-size: 14px; padding: 10px 28px; border-radius: 99px;
+  border: none; background: var(--ink); color: var(--parchment);
+  cursor: pointer; font-family: 'Noto Sans KR', sans-serif;
+  transition: background 0.15s;
+}
+.resume-btn:hover { background: var(--ink-2); }
 
 /* PROGRESS */
 .prog-bar { height: 3px; background: var(--parchment-3); }
 .prog-fill { height: 100%; background: var(--gold); transition: width 0.2s ease; width: 0%; }
 
 /* MAIN */
-.main {
-  max-width: 720px;
-  margin: 0 auto;
-  padding: 2.5rem 2rem 6rem;
-}
+.main { max-width: 720px; margin: 0 auto; padding: 2.5rem 2rem 6rem; }
 .chapter-label {
-  font-family: 'EB Garamond', serif;
-  font-size: 13px; color: var(--gold);
+  font-family: 'EB Garamond', serif; font-size: 13px; color: var(--gold);
   letter-spacing: 0.14em; text-transform: uppercase;
-  margin-bottom: 1.5rem;
-  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px;
 }
 .chapter-label::after { content:''; flex:1; height:1px; background: var(--parchment-3); }
 
 /* VERSE ROWS */
 .verse-row {
-  display: flex;
-  gap: 16px;
-  align-items: flex-start;
-  padding: 0.65rem 0;
-  border-bottom: 1px solid var(--parchment-2);
-  transition: opacity 0.3s ease;
-  position: relative;
+  display: flex; gap: 16px; align-items: flex-start;
+  padding: 0.65rem 0; border-bottom: 1px solid var(--parchment-2);
+  transition: opacity 0.3s ease; position: relative;
 }
 .verse-row:last-child { border-bottom: none; }
 .verse-row.done { opacity: var(--done-opacity); pointer-events: none; }
 .verse-row.upcoming { opacity: var(--upcoming-opacity); pointer-events: none; }
 .verse-row.active { opacity: 1; }
-
 .verse-num {
-  font-family: 'EB Garamond', serif;
-  font-size: 13px; color: var(--gold);
-  min-width: 22px; padding-top: 5px;
-  font-style: italic; user-select: none;
+  font-family: 'EB Garamond', serif; font-size: 13px; color: var(--gold);
+  min-width: 22px; padding-top: 5px; font-style: italic; user-select: none;
 }
-
-/* The inline typing area */
-.verse-body {
-  flex: 1;
-  position: relative;
-  font-family: 'Noto Serif KR', serif;
-  font-size: 17px;
-  line-height: 1.95;
-}
-
-/* Ghost text (원문) — always visible underneath */
-.verse-ghost {
-  color: var(--parchment-3);
-  user-select: none;
-  white-space: pre-wrap;
-  word-break: break-all;
-}
-
-/* Typed overlay — positioned on top */
-.verse-overlay {
-  position: absolute;
-  top: 0; left: 0;
-  white-space: pre-wrap;
-  word-break: break-all;
-  pointer-events: none;
-}
-
+.verse-body { flex: 1; position: relative; font-family: 'Noto Serif KR', serif; font-size: 17px; line-height: 1.95; }
+.verse-ghost { color: var(--parchment-3); user-select: none; white-space: pre-wrap; word-break: break-all; }
+.verse-overlay { position: absolute; top: 0; left: 0; white-space: pre-wrap; word-break: break-all; pointer-events: none; }
 .char-correct { color: var(--correct); }
-.char-wrong   { color: var(--wrong); background: var(--wrong-bg); border-radius: 2px; }
-
+.char-wrong { color: var(--wrong); background: var(--wrong-bg); border-radius: 2px; }
 .cursor {
-  display: inline-block;
-  width: 2px; height: 1em;
-  background: var(--gold);
-  vertical-align: text-bottom;
-  animation: blink 1s step-end infinite;
-  margin: 0 0.5px; border-radius: 1px;
+  display: inline-block; width: 2px; height: 1em;
+  background: var(--gold); vertical-align: text-bottom;
+  animation: blink 1s step-end infinite; margin: 0 0.5px; border-radius: 1px;
 }
 @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
 
-/* Hidden textarea — invisible but captures keystrokes */
-.hidden-input {
-  position: fixed;
-  opacity: 0;
-  pointer-events: none;
-  width: 1px; height: 1px;
-  top: -100px; left: -100px;
-}
+.hidden-input { position: fixed; opacity: 0; pointer-events: none; width: 1px; height: 1px; top: -100px; left: -100px; }
 
-/* Click-to-focus hint */
-.focus-hint {
-  font-size: 12px;
-  color: var(--ink-3);
-  text-align: center;
-  margin-top: 2rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-}
-.kbd {
-  background: var(--parchment-3); border-radius: 4px;
-  padding: 1px 7px; font-size: 11px;
-  font-family: monospace; color: var(--ink-2);
-}
+.focus-hint { font-size: 12px; color: var(--ink-3); text-align: center; margin-top: 2rem; display: flex; align-items: center; justify-content: center; gap: 6px; }
+.kbd { background: var(--parchment-3); border-radius: 4px; padding: 1px 7px; font-size: 11px; font-family: monospace; color: var(--ink-2); }
 
-/* COMPLETE BANNER */
-.done-banner {
-  display: none;
-  text-align: center;
-  padding: 1.25rem;
-  background: var(--correct);
-  color: white;
-  border-radius: 10px;
-  font-size: 14px;
-  font-weight: 500;
-  margin-top: 2rem;
-  line-height: 1.6;
-}
+.done-banner { display: none; text-align: center; padding: 1.25rem; background: var(--correct); color: white; border-radius: 10px; font-size: 14px; font-weight: 500; margin-top: 2rem; line-height: 1.6; }
 
-/* BOTTOM BTNS */
-.btn-row {
-  display: flex; gap: 8px; margin-top: 2rem;
-}
-.btn {
-  font-size: 13px; padding: 8px 18px; border-radius: 8px;
-  border: 1px solid var(--parchment-3); background: var(--parchment-2);
-  color: var(--ink-2); cursor: pointer; font-family: 'Noto Sans KR', sans-serif;
-  transition: all 0.15s;
-}
+.btn-row { display: flex; gap: 8px; margin-top: 2rem; }
+.btn { font-size: 13px; padding: 8px 18px; border-radius: 8px; border: 1px solid var(--parchment-3); background: var(--parchment-2); color: var(--ink-2); cursor: pointer; font-family: 'Noto Sans KR', sans-serif; transition: all 0.15s; }
 .btn:hover { background: var(--parchment-3); color: var(--ink); }
 .btn-primary { background: var(--ink); color: var(--parchment); border-color: var(--ink); }
 .btn-primary:hover { background: var(--ink-2); }
@@ -235,7 +155,7 @@ select:focus { outline: none; border-color: var(--gold); }
 @media (max-width: 600px) {
   .topbar { padding: 0 1rem; gap: 6px; }
   .main { padding: 1.5rem 1rem 5rem; }
-  .statsbar { padding: 0 1rem; gap: 0; overflow-x: auto; }
+  .statsbar { padding: 0 1rem; overflow-x: auto; }
   .verse-body { font-size: 15px; }
 }
 </style>
@@ -269,8 +189,16 @@ select:focus { outline: none; border-color: var(--gold); }
     <div class="stat-label">경과 시간</div>
     <div class="stat-val"><span id="s-time">0:00</span></div>
   </div>
+  <button class="pause-btn" id="pause-btn" onclick="togglePause()">⏸ 일시정지</button>
 </div>
 <div class="prog-bar"><div class="prog-fill" id="prog-fill"></div></div>
+
+<!-- PAUSE OVERLAY -->
+<div class="pause-overlay" id="pause-overlay">
+  <div class="pause-overlay-title">잠시 멈춤</div>
+  <div class="pause-overlay-sub">계속하려면 아래 버튼을 누르세요</div>
+  <button class="resume-btn" onclick="togglePause()">▶ 계속하기</button>
+</div>
 
 <div class="main">
   <div class="chapter-label" id="chap-label">창세기 1장</div>
@@ -285,7 +213,6 @@ select:focus { outline: none; border-color: var(--gold); }
   </div>
 </div>
 
-<!-- invisible textarea to capture keystrokes -->
 <textarea class="hidden-input" id="hidden-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
 
 <script>
@@ -297,7 +224,33 @@ const BIBLE = {
         2:"땅이 혼돈하고 공허하며 흑암이 깊음 위에 있고 하나님의 영은 수면 위에 운행하시니라",
         3:"하나님이 이르시되 빛이 있으라 하시니 빛이 있었고",
         4:"빛이 하나님이 보시기에 좋았더라 하나님이 빛과 어둠을 나누사",
-        5:"하나님이 빛을 낮이라 부르시고 어둠을 밤이라 부르시니라 저녁이 되고 아침이 되니 이는 첫째 날이니라"
+        5:"하나님이 빛을 낮이라 부르시고 어둠을 밤이라 부르시니라 저녁이 되고 아침이 되니 이는 첫째 날이니라",
+        6:"하나님이 이르시되 물 가운데에 궁창이 있어 물과 물로 나뉘라 하시고",
+        7:"하나님이 궁창을 만드사 궁창 아래의 물과 궁창 위의 물로 나뉘게 하시니 그대로 되니라",
+        8:"하나님이 궁창을 하늘이라 부르시니라 저녁이 되고 아침이 되니 이는 둘째 날이니라",
+        9:"하나님이 이르시되 천하의 물이 한 곳으로 모이고 뭍이 드러나라 하시니 그대로 되니라",
+        10:"하나님이 뭍을 땅이라 부르시고 모인 물을 바다라 부르시니 하나님이 보시기에 좋았더라",
+        11:"하나님이 이르시되 땅은 풀과 씨 맺는 채소와 각기 종류대로 씨 가진 열매 맺는 나무를 내라 하시니 그대로 되어",
+        12:"땅이 풀과 각기 종류대로 씨 맺는 채소와 각기 종류대로 씨 가진 열매 맺는 나무를 내니 하나님이 보시기에 좋았더라",
+        13:"저녁이 되고 아침이 되니 이는 셋째 날이니라",
+        14:"하나님이 이르시되 하늘의 궁창에 광명체들이 있어 낮과 밤을 나뉘게 하고 그것들로 징조와 계절과 날과 해를 이루게 하라",
+        15:"또 광명체들이 하늘의 궁창에 있어 땅을 비추라 하시니 그대로 되니라",
+        16:"하나님이 두 큰 광명체를 만드사 큰 광명체로 낮을 주관하게 하시고 작은 광명체로 밤을 주관하게 하시며 또 별들을 만드시고",
+        17:"하나님이 그것들을 하늘의 궁창에 두어 땅을 비추게 하시며",
+        18:"낮과 밤을 주관하게 하시고 빛과 어둠을 나뉘게 하시니 하나님이 보시기에 좋았더라",
+        19:"저녁이 되고 아침이 되니 이는 넷째 날이니라",
+        20:"하나님이 이르시되 물들은 생물을 번성하게 하라 땅 위 하늘의 궁창에는 새가 날으라 하시고",
+        21:"하나님이 큰 바다 짐승들과 물에서 번성하여 움직이는 모든 생물을 그 종류대로 날개 있는 모든 새를 그 종류대로 창조하시니 하나님이 보시기에 좋았더라",
+        22:"하나님이 그것들에게 복을 주시며 이르시되 생육하고 번성하여 여러 바닷물에 충만하라 새들도 땅에 번성하라 하시니라",
+        23:"저녁이 되고 아침이 되니 이는 다섯째 날이니라",
+        24:"하나님이 이르시되 땅은 생물을 그 종류대로 내되 가축과 기는 것과 땅의 짐승을 종류대로 내라 하시니 그대로 되니라",
+        25:"하나님이 땅의 짐승을 그 종류대로 가축을 그 종류대로 땅에 기는 모든 것을 그 종류대로 만드시니 하나님이 보시기에 좋았더라",
+        26:"하나님이 이르시되 우리의 형상을 따라 우리의 모양대로 우리가 사람을 만들고 그들로 바다의 물고기와 하늘의 새와 가축과 온 땅과 땅에 기는 모든 것을 다스리게 하자 하시고",
+        27:"하나님이 자기 형상 곧 하나님의 형상대로 사람을 창조하시되 남자와 여자를 창조하시고",
+        28:"하나님이 그들에게 복을 주시며 하나님이 그들에게 이르시되 생육하고 번성하여 땅에 충만하라 땅을 정복하라 바다의 물고기와 하늘의 새와 땅에 움직이는 모든 생물을 다스리라 하시니라",
+        29:"하나님이 이르시되 내가 온 지면의 씨 맺는 모든 채소와 씨 가진 열매 맺는 모든 나무를 너희에게 주노니 너희의 먹을 거리가 되리라",
+        30:"또 땅의 모든 짐승과 하늘의 모든 새와 생명이 있어 땅에 기는 모든 것에게는 내가 모든 푸른 풀을 먹을 거리로 주노라 하시니 그대로 되니라",
+        31:"하나님이 지으신 그 모든 것을 보시니 보시기에 심히 좋았더라 저녁이 되고 아침이 되니 이는 여섯째 날이니라"
       },
       2: {
         1:"천지와 만물이 다 이루어지니라",
@@ -343,7 +296,33 @@ const BIBLE = {
         2:"Now the earth was formless and empty, darkness was over the surface of the deep, and the Spirit of God was hovering over the waters.",
         3:"And God said, Let there be light, and there was light.",
         4:"God saw that the light was good, and he separated the light from the darkness.",
-        5:"God called the light day, and the darkness he called night. And there was evening, and there was morning, the first day."
+        5:"God called the light day, and the darkness he called night. And there was evening, and there was morning, the first day.",
+        6:"And God said, Let there be a vault between the waters to separate water from water.",
+        7:"So God made the vault and separated the water under the vault from the water above it. And it was so.",
+        8:"God called the vault sky. And there was evening, and there was morning, the second day.",
+        9:"And God said, Let the water under the sky be gathered to one place, and let dry ground appear. And it was so.",
+        10:"God called the dry ground land, and the gathered waters he called seas. And God saw that it was good.",
+        11:"Then God said, Let the land produce vegetation: seed-bearing plants and trees on the land that bear fruit with seed in it, according to their various kinds. And it was so.",
+        12:"The land produced vegetation: plants bearing seed according to their kinds and trees bearing fruit with seed in it according to their kinds. And God saw that it was good.",
+        13:"And there was evening, and there was morning, the third day.",
+        14:"And God said, Let there be lights in the vault of the sky to separate the day from the night, and let them serve as signs to mark sacred times, and days and years.",
+        15:"and let them be lights in the vault of the sky to give light on the earth. And it was so.",
+        16:"God made two great lights, the greater light to govern the day and the lesser light to govern the night. He also made the stars.",
+        17:"God set them in the vault of the sky to give light on the earth,",
+        18:"to govern the day and the night, and to separate light from darkness. And God saw that it was good.",
+        19:"And there was evening, and there was morning, the fourth day.",
+        20:"And God said, Let the water teem with living creatures, and let birds fly above the earth across the vault of the sky.",
+        21:"So God created the great creatures of the sea and every living thing with which the water teems and that moves about in it, according to their kinds, and every winged bird according to its kind. And God saw that it was good.",
+        22:"God blessed them and said, Be fruitful and increase in number and fill the water in the seas, and let the birds increase on the earth.",
+        23:"And there was evening, and there was morning, the fifth day.",
+        24:"And God said, Let the land produce living creatures according to their kinds: the livestock, the creatures that move along the ground, and the wild animals, each according to its kind. And it was so.",
+        25:"God made the wild animals according to their kinds, the livestock according to their kinds, and all the creatures that move along the ground according to their kinds. And God saw that it was good.",
+        26:"Then God said, Let us make mankind in our image, in our likeness, so that they may rule over the fish in the sea and the birds in the sky, over the livestock and all the wild animals, and over all the creatures that move along the ground.",
+        27:"So God created mankind in his own image, in the image of God he created them; male and female he created them.",
+        28:"God blessed them and said to them, Be fruitful and increase in number; fill the earth and subdue it. Rule over the fish in the sea and the birds in the sky and over every living creature that moves on the ground.",
+        29:"Then God said, I give you every seed-bearing plant on the face of the whole earth and every tree that has fruit with seed in it. They will be yours for food.",
+        30:"And to all the beasts of the earth and all the birds in the sky and all the creatures that move along the ground, everything that has the breath of life in it, I give every green plant for food. And it was so.",
+        31:"God saw all that he had made, and it was very good. And there was evening, and there was morning, the sixth day."
       },
       2: {
         1:"Thus the heavens and the earth were completed in all their vast array.",
@@ -392,13 +371,53 @@ let totalTypedChars = 0, totalCorrectChars = 0;
 let doneCount = 0;
 let chapterDone = false;
 let verseCompleted = false;
+let isPaused = false;
+let pausedElapsed = 0; // 일시정지까지 누적 경과시간(ms)
+let pauseStart = null;
 
-// ── focus management ──
-document.body.addEventListener('click', () => {
-  if (!chapterDone) document.getElementById('hidden-input').focus();
+// focus
+document.body.addEventListener('click', (e) => {
+  if (!chapterDone && !isPaused && !e.target.closest('select') && !e.target.closest('button')) {
+    document.getElementById('hidden-input').focus();
+  }
 });
 document.getElementById('hidden-input').addEventListener('input', onInput);
 document.getElementById('hidden-input').addEventListener('keydown', onKeyDown);
+
+// ESC로도 일시정지
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') togglePause();
+});
+
+function togglePause() {
+  if (chapterDone) return;
+  isPaused = !isPaused;
+  const overlay = document.getElementById('pause-overlay');
+  const btn = document.getElementById('pause-btn');
+
+  if (isPaused) {
+    overlay.classList.add('active');
+    btn.classList.add('paused');
+    btn.textContent = '▶ 계속하기';
+    // 경과 시간 누적 저장
+    if (startTime) {
+      pausedElapsed += Date.now() - startTime;
+      startTime = null;
+    }
+    clearInterval(timerInterval);
+    timerInterval = null;
+  } else {
+    overlay.classList.remove('active');
+    btn.classList.remove('paused');
+    btn.textContent = '⏸ 일시정지';
+    // 재개: startTime 리셋
+    if (pausedElapsed > 0 || totalTypedChars > 0) {
+      startTime = Date.now();
+      timerInterval = setInterval(tickStats, 250);
+    }
+    document.getElementById('hidden-input').focus();
+  }
+}
 
 function setLang(l, btn) {
   lang = l;
@@ -408,6 +427,10 @@ function setLang(l, btn) {
   document.getElementById('focus-hint').innerHTML = l === 'ko'
     ? '화면을 클릭하면 입력 시작 · 구절 완료 후 <span class="kbd">Enter</span> 로 다음 구절'
     : 'Click to start · Press <span class="kbd">Enter</span> after each verse';
+  document.querySelector('.pause-btn').textContent = '⏸ ' + (l === 'ko' ? '일시정지' : 'Pause');
+  document.querySelector('.resume-btn').textContent = '▶ ' + (l === 'ko' ? '계속하기' : 'Resume');
+  document.querySelector('.pause-overlay-title').textContent = l === 'ko' ? '잠시 멈춤' : 'Paused';
+  document.querySelector('.pause-overlay-sub').textContent = l === 'ko' ? '계속하려면 아래 버튼을 누르세요' : 'Press the button below to resume';
   populateBooks();
 }
 
@@ -442,10 +465,13 @@ function loadChapter() {
   currentIdx = 0; doneCount = 0;
   totalTypedChars = 0; totalCorrectChars = 0;
   chapterDone = false; verseCompleted = false;
-  clearInterval(timerInterval); startTime = null;
+  isPaused = false; pausedElapsed = 0; pauseStart = null;
+  clearInterval(timerInterval); startTime = null; timerInterval = null;
 
-  document.getElementById('chap-label').textContent =
-    lang === 'ko' ? `${book} ${chap}장` : `${book} Chapter ${chap}`;
+  document.getElementById('pause-overlay').classList.remove('active');
+  document.getElementById('pause-btn').classList.remove('paused');
+  document.getElementById('pause-btn').textContent = '⏸ ' + (lang === 'ko' ? '일시정지' : 'Pause');
+  document.getElementById('chap-label').textContent = lang === 'ko' ? `${book} ${chap}장` : `${book} Chapter ${chap}`;
   document.getElementById('s-speed').textContent = '0';
   document.getElementById('s-acc').textContent = '—';
   document.getElementById('s-acc-u').textContent = '';
@@ -466,30 +492,16 @@ function renderAll() {
     const row = document.createElement('div');
     row.className = 'verse-row ' + (i < currentIdx ? 'done' : i === currentIdx ? 'active' : 'upcoming');
     row.id = 'vrow-' + i;
-
     const num = document.createElement('div');
-    num.className = 'verse-num';
-    num.textContent = verseKeys[i];
-
+    num.className = 'verse-num'; num.textContent = verseKeys[i];
     const body = document.createElement('div');
-    body.className = 'verse-body';
-    body.id = 'vbody-' + i;
-
-    // ghost (원문 회색)
+    body.className = 'verse-body'; body.id = 'vbody-' + i;
     const ghost = document.createElement('div');
-    ghost.className = 'verse-ghost';
-    ghost.id = 'vghost-' + i;
-    ghost.textContent = v;
-
-    // overlay (타이핑 글자)
+    ghost.className = 'verse-ghost'; ghost.id = 'vghost-' + i; ghost.textContent = v;
     const overlay = document.createElement('div');
-    overlay.className = 'verse-overlay';
-    overlay.id = 'voverlay-' + i;
-
-    body.appendChild(ghost);
-    body.appendChild(overlay);
-    row.appendChild(num);
-    row.appendChild(body);
+    overlay.className = 'verse-overlay'; overlay.id = 'voverlay-' + i;
+    body.appendChild(ghost); body.appendChild(overlay);
+    row.appendChild(num); row.appendChild(body);
     list.appendChild(row);
   });
 }
@@ -503,21 +515,24 @@ function renderOverlay(idx, typed) {
     const ch = typed[i] === ' ' ? '\u00a0' : typed[i];
     html += `<span class="${ok ? 'char-correct' : 'char-wrong'}">${ch}</span>`;
   }
-  if (typed.length < verse.length) {
-    html += '<span class="cursor"></span>';
-  }
+  if (typed.length < verse.length) html += '<span class="cursor"></span>';
   overlay.innerHTML = html;
 }
 
 function onKeyDown(e) {
   if (e.key === 'Enter') {
     e.preventDefault();
-    if (verseCompleted && !chapterDone) advanceToNext();
+    if (verseCompleted && !chapterDone && !isPaused) advanceToNext();
   }
 }
 
+function getElapsed() {
+  // 총 경과시간(ms) = 누적 + 현재 세션
+  return pausedElapsed + (startTime ? Date.now() - startTime : 0);
+}
+
 function onInput() {
-  if (chapterDone || verseCompleted) {
+  if (chapterDone || verseCompleted || isPaused) {
     document.getElementById('hidden-input').value = '';
     return;
   }
@@ -531,7 +546,6 @@ function onInput() {
 
   renderOverlay(currentIdx, typed);
 
-  // progress
   const totalChars = verses.reduce((a, v) => a + v.length, 0);
   const doneChars = verses.slice(0, currentIdx).reduce((a, v) => a + v.length, 0);
   const prog = Math.min(100, Math.round(((doneChars + typed.length) / totalChars) * 100));
@@ -549,21 +563,17 @@ function onInput() {
     doneCount++;
     document.getElementById('s-done').textContent = doneCount;
     verseCompleted = true;
-    inp.value = ''; // 즉시 비워서 다음 onInput에 잔여 글자 안 남게
+    inp.value = '';
 
-    // ✦ 완료 표시
     const overlay = document.getElementById('voverlay-' + currentIdx);
     overlay.innerHTML += '<span style="color:var(--gold);font-family:\'EB Garamond\',serif;font-size:0.9em;margin-left:4px">✦</span>';
 
-    if (currentIdx === verses.length - 1) {
-      finishChapter();
-    }
+    if (currentIdx === verses.length - 1) finishChapter();
   }
 }
 
 function updateLiveStats(typed) {
-  if (!startTime) return;
-  const elapsed = (Date.now() - startTime) / 1000;
+  const elapsed = getElapsed() / 1000;
   if (elapsed < 0.3) return;
   const allTyped = totalTypedChars + typed.length;
   if (allTyped === 0) return;
@@ -579,8 +589,8 @@ function updateLiveStats(typed) {
 }
 
 function tickStats() {
-  if (!startTime) return;
-  const totalSec = Math.floor((Date.now() - startTime) / 1000);
+  if (isPaused) return;
+  const totalSec = Math.floor(getElapsed() / 1000);
   const m = Math.floor(totalSec / 60);
   const s = String(totalSec % 60).padStart(2, '0');
   document.getElementById('s-time').textContent = m + ':' + s;
@@ -593,7 +603,6 @@ function advanceToNext() {
   currentIdx++;
   verseCompleted = false;
   document.getElementById('vrow-' + currentIdx).className = 'verse-row active';
-  // value를 먼저 비우고, 그 후 onInput이 트리거되지 않도록 플래그
   const inp = document.getElementById('hidden-input');
   inp.value = '';
   renderOverlay(currentIdx, '');
